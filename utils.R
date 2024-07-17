@@ -144,28 +144,6 @@ fit_rsa <- function(Y_test, fit_train, params, trial_condition) {
 }
 
 
-fit_singletrial_rsa <- function(d2, rsa_models, trial_condition) {
-
-  cond_names <- rownames(rsa_models)
-  rsa_model_names <- dimnames(rsa_models)[[3]]
-  coefs <- vector("list", length(cond_names))
-  for (i in seq_along(cond_names)) {
-    cond <- cond_names[i]
-    is_cond <- trial_condition == cond
-    d2_i <- d2[, is_cond]  ## select trials belonging to condition
-    x_i <- cbind(1, rsa_models[, cond, ])
-    b_i <- t(coef(.lm.fit(x_i, d2_i)))
-    coefs[[i]] <- b_i
-  }
-  coefs <- as.data.frame(do.call(rbind, coefs))
-  names(coefs) <- c("intercept", rsa_model_names)
-  coefs$condition <- trial_condition
-
-  coefs
-
-}
-
-
 create_encoding_contrasts <- function(A, encoding_contrasts) {
   contrast_mats <- lapply(
     encoding_contrasts,
