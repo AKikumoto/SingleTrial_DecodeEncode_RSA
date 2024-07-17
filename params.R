@@ -20,6 +20,8 @@ new_params <- function(
   ## design matrix: maps each condition to a trial
   X <- model.matrix(~ 0 + factor(rep(1:n["condition"], each = n["trial"])))
   colnames(X) <- conditions$id
+  trial_condition <- dummy2factor(X)
+
 
   ## scale axes non-selectively (i.e., in all conditions)
   if (!is.null(feature_weights)) {
@@ -73,7 +75,7 @@ new_params <- function(
   ## return
   list(
     ## design:
-    conditions = conditions, n = n, A = A, X = X, 
+    conditions = conditions, n = n, A = A, X = X, trial_condition = trial_condition,
     ## data:
     A_trans = A_trans, mu = mu, sigma = sigma,
     ## rsa, encoding:

@@ -127,7 +127,7 @@ create_rsa_models <- function(conditions, rsa_model_names) {
 }
 
 
-fit_rsa <- function(Y_test, fit_train, params, trial_condition) {
+fit_rsa <- function(Y_test, fit_train, params) {
 
   b_train <- coef(fit_train)  ## class means
   d2 <- t(pdist(Y_test, b_train))  ## single-trial squared euclidean distances
@@ -135,7 +135,7 @@ fit_rsa <- function(Y_test, fit_train, params, trial_condition) {
   .fit_singletrial_model(
     models = params$rsa_models,
     y = t(d2),
-    trial_condition = trial_condition,
+    trial_condition = params$trial_condition,
     fit_fun = \(model_i, y_i) {
       t(coef(.lm.fit(cbind(1, model_i), t(y_i))))
     }
@@ -169,7 +169,7 @@ signed_scale <- function(x) {
 }
 
 
-fit_encoding <- function(Y_test, fit_train, params, trial_condition) {
+fit_encoding <- function(Y_test, fit_train, params) {
 
   contrast <- t(solve(params$A[, 1:nrow(params$A)]))
   b_axes_train <- crossprod(coef(fit_train), contrast)
@@ -178,7 +178,7 @@ fit_encoding <- function(Y_test, fit_train, params, trial_condition) {
   .fit_singletrial_model(
     models = params$encoding_contrasts,
     y = encoding_projs,
-    trial_condition = trial_condition,
+    trial_condition = params$trial_condition,
     fit_fun = \(model_i, y_i) y_i %*% model_i
   )
 
@@ -204,5 +204,49 @@ fit_encoding <- function(Y_test, fit_train, params, trial_condition) {
   coefs$condition <- trial_condition
   
   coefs
+
+}
+
+summarize_df <- function(df, fun = \(x) colMeans2(x) / colSds(x)) {
+  m <- as.matrix(df[vapply(df, is.numeric, logical(1))])
+  c(fun(m))
+}
+
+
+.simulate_singletrial <- function(params) {
+
+    ## initial encoding models (for both decoding+RSA and encoding)
+
+    Y <- list(train = generate_data(params), test = generate_data(params))
+    fit <- lapply(Y, \(y, x = params$X) fit_encoder(X = x, Y = y))
+
+    ## decoding + rsa
+
+    rsa_coefs <- fit_rsa(Y$test, fit$train, params)
+
+    ## encoding
+
+    encoding_projs <- fit_encoding(Y$test, fit$train, params)
+
+    ## summarize
+
+    rsa_coefs_sum <- summarize_df(rsa_coefs)
+    encoding_projs_sum <- summarize_df(encoding_projs)
+    res <- c(rsa_coefs_sum, encoding_projs_sum)
+    method <- c(rep("rsa", length(rsa_coefs_sum)), rep("encoding", length(encoding_projs_sum)))
+    data.table(effsize = res, term = names(res), method = method)
+
+}
+
+
+simulate_singletrial <- function(params) {
+  
+  sim_idx <- seq_len(params$n["sim"])
+  res <- foreach(
+    x = sim_idx, 
+    .options.future = list(seed = TRUE)
+    ) %dofuture% .simulate_singletrial(params)
+  
+  rbindlist(res, idcol = "sim_idx")
 
 }
