@@ -1,8 +1,6 @@
 # SingleTrial Decoding/Encopding RSA
 this repository contains several scripts simulation single-trial RSA introduced in Kikumoto & Mayr, 2020, PNAS
 
-
-# -------------------------------------------------------------------
 # Simulation for expanded space solution for possible false positives
 As discussed in Kikumoto, Sameshima & Mayr, 2022, PsychScience (in the supplementary), when the RSA model of interest (e.g., conjunction) is equivalent to the target label for decoding, 
 this method could generate false positives. Such false positive results tend to occur when multiple lower substitute representations (e.g., stimulus, response, and rule) co-exist. 
