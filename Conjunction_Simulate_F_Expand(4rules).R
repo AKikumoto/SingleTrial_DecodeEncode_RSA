@@ -51,7 +51,7 @@ for (m in 1:length(mlist)){assign(gsub(".txt","",mlist)[m],mL[[m]])}
 
 # Hypothetical units
 mL_S<-lapply(mL,function(x){x<-x/x;x[is.nanM(x)]<-0;x});# put all units in a same range of activation
-names(mL_S)<-c("CUE","ODDEVEN","RESP","RSRCCONJ","RSRCONJ","RULE","SRCONJ","STIM")
+names(mL_S)<-c("ODDEVEN","RESP","RSRCCONJ","RSRCONJ","RULE","SRCONJ","STIM")
 for (v in names(mL_S)){names(mL_S[[v]])<-print(paste0(v,"_",names(mL_S[[v]])))}
 
 #======================================================================================================
@@ -62,6 +62,8 @@ ntrial<-2000
 ncontext<-dim(RESP_M)[1];
 ds<-data.table(LABEL=rep(1:ncontext,1,ntrial))
 
+i<-1
+
 r<-foreach(i=1:ntrial) %dopar%{
   # 12 hypothetical units (V1~V12) for each feature
   cl <- ds$LABEL[i] #cl <- sample(ds$LABEL,1);# permutation test
@@ -69,13 +71,13 @@ r<-foreach(i=1:ntrial) %dopar%{
   stim_s <- mL_S[["STIM"]][cl,] + rnorm(ncontext,0,0.5);
   resp_s <- mL_S[["RESP"]][cl,] + rnorm(ncontext,0,0.5);
   oddeven_s <- mL_S[["ODDEVEN"]][cl,] + rnorm(ncontext,0,0.5);
-  conj_low_s <- mL_S[["SRCCONJ"]][cl,] + rnorm(ncontext,0,0.5);
+  conj_low_s <- mL_S[["SRCONJ"]][cl,] + rnorm(ncontext,0,0.5);
   conj_med_s <- mL_S[["RSRCONJ"]][cl,] + rnorm(ncontext,0,0.5);
   conj_high_s <- mL_S[["RSRCCONJ"]][cl,] + rnorm(ncontext,0,0.5);
   noise <- data.table(t(rnorm(ncontext,0,1.5)));
   #noise <- data.table(t(runif(ncontext,min=0,max=1)));
   names(noise) <- paste0("NOISE_",names(noise)) 
-  obs <- cbind(rule_s,stim_s,resp_s,oddeven_s,noise); # signal (Adjust this part!)
+  obs <- cbind(rule_s,stim_s,resp_s,oddeven_s,conj_low_s,noise); # signal (Adjust this part!)
 }
 
 ds <- cbind(ds,bind_rows(r))
