@@ -11,5 +11,8 @@ There are two scripts for this simulation:
 Conjunction_Simulate_F_Expand(3rules).R applies this logic to Exp.1 of Kikumoto & Mayr, 2020, PNAS (using even-odd trials as factor C)
 Conjunction_Simulate_F_Expand(4rules).R applies this logic to Exp.2 of Kikumoto & Mayr, 2020, PNAS (here multiple conjunctions could be tested)
 
+In addition, the second regression step could be performed using Mahalanobis distance instead of probabilities (note that original papers used logit transformed probabilities). If linear discriminant analysis is used in the first step, taking a log of probabilities is closely related to Mahalanobis distance: https://scikit-learn.org/stable/modules/lda_qda.html#lda
+
+
 # Simulation2: comparison to encoding approach
 WIP
